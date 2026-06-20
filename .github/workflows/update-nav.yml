@@ -1,0 +1,41 @@
+name: Mise a jour VL fonds
+
+on:
+  schedule:
+    - cron: "0 19 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-nav:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Recuperer le depot
+        uses: actions/checkout@v4
+
+      - name: Installer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Installer Playwright + navigateur
+        run: |
+          pip install playwright
+          python -m playwright install --with-deps chromium
+
+      - name: Lancer le robot
+        run: python scraper.py
+
+      - name: Commiter nav.json si modifie
+        run: |
+          git config user.name "nav-bot"
+          git config user.email "nav-bot@users.noreply.github.com"
+          if [ -n "$(git status --porcelain nav.json history.json)" ]; then
+            git add nav.json history.json
+            git commit -m "MAJ VL fonds"
+            git push
+          else
+            echo "Aucun changement de VL."
+          fi
