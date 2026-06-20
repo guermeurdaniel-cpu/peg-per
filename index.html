@@ -26,4 +26,137 @@
   .overlay-box { background:#1c1c1e; border-radius:12px; padding:10px; margin-top:14px; }
   .overlay-title { font-size:11px; color:#8e8e93; margin-bottom:6px; }
   .overlay-svg { width:100%; height:180px; display:block; }
-  .legend { display:flex; flex-wrap:wrap; gap:6px 12px; margin-top:8px; font-size:10px;
+  .legend { display:flex; flex-wrap:wrap; gap:6px 12px; margin-top:8px; font-size:10px; color:#aeaeb2; }
+  .legend span { display:inline-flex; align-items:center; gap:4px; }
+  .dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
+  .refresh { display:block; margin:18px auto 0; background:#2c2c2e; color:#0a84ff; border:none; border-radius:10px; padding:8px 16px; font-size:14px; font-weight:600; }
+  .scale-note { font-size:10px; color:#636366; margin:10px 4px 0; text-align:center; }
+</style>
+</head>
+<body>
+  <h1>PEG / PER — VL et évolution</h1>
+  <div class="note">Valeur liquidative et évolution uniquement (pas de montant ni de quantité). Base 100 au 1er jour enregistré.</div>
+
+  <div id="list"></div>
+
+  <div class="overlay-box">
+    <div class="overlay-title">Courbes superposées (base 100, échelle commune)</div>
+    <div id="overlay"></div>
+  </div>
+
+  <div id="scaleNote"></div>
+  <button class="refresh" onclick="loadAll()">Actualiser</button>
+
+<script>
+// =======================================================
+// Les 7 fonds, dans l'ordre d'affichage. scope = "PEG+PER" ou "PER".
+// =======================================================
+const FONDS = [
+  { isin:"QS0009080720", label:"Amundi Label Monetaire ESR - F",          scope:"PEG+PER" },
+  { isin:"QS0009099829", label:"Amundi Protect 90 ESR",                   scope:"PEG+PER" },
+  { isin:"QS0009080746", label:"Amundi Label Equilibre ESR - F",          scope:"PEG+PER" },
+  { isin:"QS0009122746", label:"CPR ES Action Climat - F",                scope:"PEG+PER" },
+  { isin:"QS0009080175", label:"Amundi Actions Internationales ESR - F",  scope:"PEG+PER" },
+  { isin:"QS0009102334", label:"Amundi Label Harmonie Solidaire ESR - F", scope:"PEG+PER" },
+  { isin:"QS0009116219", label:"Amundi Convictions ESR - F (C)",          scope:"PER" }
+];
+const COLORS = ["#0a84ff","#30d158","#bf5af2","#ff9f0a","#ff7b72","#5e5ce6","#64d2ff"];
+// =======================================================
+
+function eur(v){ return v.toLocaleString("fr-FR",{minimumFractionDigits:2,maximumFractionDigits:4}); }
+
+// base 100 = PREMIER point enregistre de CETTE serie
+function toBase100(values){
+  if(!values || values.length<1 || !values[0]) return null;
+  return values.map(function(v){ return v/values[0]*100; });
+}
+function variation(values){ if(!values||values.length<2)return null; return (values[values.length-1]-values[0])/values[0]*100; }
+function lastChange(values){ if(!values||values.length<2)return null; const a=values[values.length-2],b=values[values.length-1]; return {diff:b-a,pct:(b-a)/a*100}; }
+function pctSpan(p,l){ if(p==null||!isFinite(p))return ""; return '<span class="'+(p>=0?'up':'down')+'">'+l+(p>=0?'+':'')+p.toFixed(2)+'%</span>'; }
+
+function sparkline(values100, gmin, gmax, up){
+  if(!values100 || values100.length<2) return '<svg class="spark"></svg>';
+  const w=96,h=40,pad=3, range=(gmax-gmin)||1;
+  const yOf=function(v){ return h-pad-(v-gmin)/range*(h-2*pad); };
+  const pts=values100.map(function(v,i){ return (pad+i*(w-2*pad)/(values100.length-1)).toFixed(1)+","+yOf(v).toFixed(1); }).join(" ");
+  const color=up?"#30d158":"#ff7b72";
+  let bl="";
+  if(gmin<=100 && gmax>=100){ const y=yOf(100).toFixed(1); bl='<line x1="'+pad+'" y1="'+y+'" x2="'+(w-pad)+'" y2="'+y+'" stroke="#48484a" stroke-width="1" stroke-dasharray="2,2"/>'; }
+  return '<svg class="spark" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none">'+bl+'<polyline fill="none" stroke="'+color+'" stroke-width="2" points="'+pts+'"/></svg>';
+}
+
+function overlayChart(series, gmin, gmax){
+  const w=320,h=180,pad=6, range=(gmax-gmin)||1;
+  const maxLen = Math.max.apply(null, series.map(function(s){return s.values?s.values.length:0;}).concat([0]));
+  if(maxLen<2) return '<div class="note">Pas encore assez de points pour tracer les courbes (revenir après quelques jours de robot).</div>';
+  const yOf=function(v){ return h-pad-(v-gmin)/range*(h-2*pad); };
+  let lines="";
+  series.forEach(function(s){
+    if(!s.values || s.values.length<2) return;
+    const xstep=(w-2*pad)/(s.values.length-1);
+    const pts=s.values.map(function(v,i){ return (pad+i*xstep).toFixed(1)+","+yOf(v).toFixed(1); }).join(" ");
+    lines += '<polyline fill="none" stroke="'+s.color+'" stroke-width="2" points="'+pts+'"/>';
+  });
+  let bl="";
+  if(gmin<=100 && gmax>=100){ const y=yOf(100).toFixed(1); bl='<line x1="'+pad+'" y1="'+y+'" x2="'+(w-pad)+'" y2="'+y+'" stroke="#48484a" stroke-width="1" stroke-dasharray="3,3"/>'; }
+  const legend = series.map(function(s){ return '<span><span class="dot" style="background:'+s.color+'"></span>'+s.label+'</span>'; }).join("");
+  return '<svg class="overlay-svg" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none">'+bl+lines+'</svg><div class="legend">'+legend+'</div>';
+}
+
+function badge(scope){
+  if(scope==="PER") return '<span class="badge per">PER</span>';
+  return '<span class="badge both">PEG + PER</span>';
+}
+
+function rowFund(f, raw, gmin, gmax){
+  const moPct=variation(raw), lc=lastChange(raw);
+  const lastVal = raw && raw.length ? raw[raw.length-1] : null;
+  const valTxt = lastVal!=null ? eur(lastVal) : "—";
+  return '<div class="info"><div class="nm">'+f.label+'</div><div class="meta">'+badge(f.scope)+'<span>'+f.isin+'</span></div><div class="sub">'
+    +'<span class="pr">'+valTxt+'</span>'+pctSpan(lc?lc.pct:null,"j ")+pctSpan(moPct,"tot ")
+    +'</div></div>'+sparkline(toBase100(raw),gmin,gmax,(moPct==null?0:moPct)>=0);
+}
+
+async function loadAll(){
+  document.getElementById("list").innerHTML='<div class="row"><div class="sub">Chargement...</div></div>';
+
+  let hist={};
+  try{
+    const hR=await fetch("history.json?t="+Date.now());
+    if(hR.ok) hist=await hR.json();
+  }catch(e){}
+
+  // Echelle base 100 commune a TOUS les fonds
+  let gmin=Infinity, gmax=-Infinity;
+  FONDS.forEach(function(f){
+    const raw=(hist[f.isin]||[]).map(function(e){return e.value;});
+    const b=toBase100(raw);
+    if(b) b.forEach(function(v){ if(v<gmin)gmin=v; if(v>gmax)gmax=v; });
+  });
+  if(!isFinite(gmin)||!isFinite(gmax)||gmin===gmax){ gmin=95; gmax=105; }
+  const margin=(gmax-gmin)*0.08 || 1; gmin-=margin; gmax+=margin;
+
+  // Lignes + series pour la superposition
+  const box=document.getElementById("list"); box.innerHTML="";
+  const overlaySeries=[];
+  FONDS.forEach(function(f, idx){
+    const raw=(hist[f.isin]||[]).map(function(e){return e.value;});
+    const row=document.createElement("div"); row.className="row";
+    if(raw.length>=1){
+      row.innerHTML=rowFund(f, raw, gmin, gmax);
+      overlaySeries.push({label:f.label, values:toBase100(raw), color:COLORS[idx%COLORS.length]});
+    } else {
+      row.innerHTML='<div class="info"><div class="nm">'+f.label+'</div><div class="meta">'+badge(f.scope)+'<span>'+f.isin+'</span></div><div class="err">Pas encore de donnees — 1er passage du robot en attente</div></div><svg class="spark"></svg>';
+    }
+    box.appendChild(row);
+  });
+
+  document.getElementById("overlay").innerHTML = overlayChart(overlaySeries, gmin, gmax);
+  document.getElementById("scaleNote").innerHTML='<div class="scale-note">Base 100 = 1er point de chaque fonds. Echelle commune : '+gmin.toFixed(1)+'-'+gmax.toFixed(1)+'. j=jour, tot=depuis le debut du suivi.</div>';
+}
+
+loadAll();
+setInterval(loadAll, 60000);
+</script>
+</body>
+</html>
