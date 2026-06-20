@@ -25,10 +25,14 @@
   .spark { width:96px; height:40px; display:block; }
   .overlay-box { background:#1c1c1e; border-radius:12px; padding:10px; margin-top:14px; }
   .overlay-title { font-size:11px; color:#8e8e93; margin-bottom:6px; }
-  .overlay-svg { width:100%; height:180px; display:block; }
-  .legend { display:flex; flex-wrap:wrap; gap:6px 12px; margin-top:8px; font-size:10px; color:#aeaeb2; }
-  .legend span { display:inline-flex; align-items:center; gap:4px; }
-  .dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
+  .overlay-svg { width:100%; height:260px; display:block; }
+  .legend { display:flex; flex-direction:column; gap:2px; margin-top:10px; font-size:11px; color:#aeaeb2; }
+  .legend .item { display:flex; align-items:center; gap:8px; padding:5px 6px; border-radius:7px; cursor:pointer; -webkit-user-select:none; user-select:none; }
+  .legend .item.dim { opacity:.4; }
+  .legend .item.on { background:#2c2c2e; color:#fff; }
+  .legend .swatch { width:18px; height:3px; border-radius:2px; flex:0 0 auto; }
+  .legend .lbl { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .legend-hint { font-size:10px; color:#636366; margin:6px 4px 0; }
   .refresh { display:block; margin:18px auto 0; background:#2c2c2e; color:#0a84ff; border:none; border-radius:10px; padding:8px 16px; font-size:14px; font-weight:600; }
   .scale-note { font-size:10px; color:#636366; margin:10px 4px 0; text-align:center; }
 </style>
@@ -85,23 +89,60 @@ function sparkline(values100, gmin, gmax, up){
   return '<svg class="spark" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none">'+bl+'<polyline fill="none" stroke="'+color+'" stroke-width="2" points="'+pts+'"/></svg>';
 }
 
-function overlayChart(series, gmin, gmax){
-  const w=320,h=180,pad=6, range=(gmax-gmin)||1;
-  const maxLen = Math.max.apply(null, series.map(function(s){return s.values?s.values.length:0;}).concat([0]));
-  if(maxLen<2) return '<div class="note">Pas encore assez de points pour tracer les courbes (revenir après quelques jours de robot).</div>';
-  const yOf=function(v){ return h-pad-(v-gmin)/range*(h-2*pad); };
-  let lines="";
-  series.forEach(function(s){
-    if(!s.values || s.values.length<2) return;
-    const xstep=(w-2*pad)/(s.values.length-1);
-    const pts=s.values.map(function(v,i){ return (pad+i*xstep).toFixed(1)+","+yOf(v).toFixed(1); }).join(" ");
-    lines += '<polyline fill="none" stroke="'+s.color+'" stroke-width="2" points="'+pts+'"/>';
-  });
-  let bl="";
-  if(gmin<=100 && gmax>=100){ const y=yOf(100).toFixed(1); bl='<line x1="'+pad+'" y1="'+y+'" x2="'+(w-pad)+'" y2="'+y+'" stroke="#48484a" stroke-width="1" stroke-dasharray="3,3"/>'; }
-  const legend = series.map(function(s){ return '<span><span class="dot" style="background:'+s.color+'"></span>'+s.label+'</span>'; }).join("");
-  return '<svg class="overlay-svg" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none">'+bl+lines+'</svg><div class="legend">'+legend+'</div>';
+// --- Graphique superpose interactif ---
+let OV = { series:[], gmin:0, gmax:0 };
+let selectedIdx = null;
+
+function niceTicks(min,max,count){
+  const span=max-min; if(span<=0) return [min];
+  const raw=span/count, mag=Math.pow(10,Math.floor(Math.log10(raw))), norm=raw/mag;
+  let step = norm<1.5?1: norm<3?2: norm<7?5:10; step*=mag;
+  const start=Math.ceil(min/step)*step, ticks=[];
+  for(let v=start; v<=max+1e-9; v+=step) ticks.push(+v.toFixed(6));
+  return ticks;
 }
+
+function renderOverlay(){
+  const el=document.getElementById("overlay");
+  const series=OV.series, gmin=OV.gmin, gmax=OV.gmax;
+  const maxLen=Math.max.apply(null, series.map(function(s){return s.values?s.values.length:0;}).concat([0]));
+  if(maxLen<2){ el.innerHTML='<div class="note">Pas encore assez de points pour tracer les courbes (revenir après quelques jours de robot).</div>'; return; }
+  const w=340,h=260,padL=34,padR=8,padT=12,padB=12, range=(gmax-gmin)||1;
+  const yOf=function(v){ return h-padB-(v-gmin)/range*(h-padT-padB); };
+  const xOf=function(i,n){ return padL+i*(w-padL-padR)/(n-1); };
+
+  // graduations horizontales + valeurs
+  let grid="";
+  niceTicks(gmin,gmax,4).forEach(function(t){
+    const y=yOf(t).toFixed(1), strong=(Math.abs(t-100)<1e-6);
+    grid+='<line x1="'+padL+'" y1="'+y+'" x2="'+(w-padR)+'" y2="'+y+'" stroke="'+(strong?'#5a5a5e':'#333336')+'" stroke-width="1"'+(strong?' stroke-dasharray="3,3"':'')+'/>';
+    grid+='<text x="'+(padL-4)+'" y="'+(parseFloat(y)+3).toFixed(1)+'" text-anchor="end" font-size="9" fill="#8e8e93">'+t.toFixed(0)+'</text>';
+  });
+
+  function pathFor(s){ const n=s.values.length; return s.values.map(function(v,i){ return xOf(i,n).toFixed(1)+","+yOf(v).toFixed(1); }).join(" "); }
+
+  // courbes non selectionnees d'abord, puis la selectionnee par-dessus
+  let lines="";
+  series.forEach(function(s,idx){
+    if(!s.values||s.values.length<2) return;
+    if(selectedIdx!==null && idx===selectedIdx) return;
+    const dim=(selectedIdx!==null);
+    lines+='<polyline fill="none" stroke="'+s.color+'" stroke-width="'+(dim?1.3:2)+'" opacity="'+(dim?0.22:1)+'" points="'+pathFor(s)+'"/>';
+  });
+  if(selectedIdx!==null && series[selectedIdx] && series[selectedIdx].values.length>=2){
+    const s=series[selectedIdx];
+    lines+='<polyline fill="none" stroke="'+s.color+'" stroke-width="3.2" points="'+pathFor(s)+'"/>';
+  }
+
+  const svg='<svg class="overlay-svg" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none">'+grid+lines+'</svg>';
+  const items=series.map(function(s,idx){
+    const cls='item'+(selectedIdx===idx?' on':(selectedIdx!==null?' dim':''));
+    return '<div class="'+cls+'" onclick="toggleCurve('+idx+')"><span class="swatch" style="background:'+s.color+'"></span><span class="lbl">'+s.label+'</span></div>';
+  }).join("");
+  el.innerHTML=svg+'<div class="legend">'+items+'</div><div class="legend-hint">Touchez un fonds pour isoler sa courbe (touchez à nouveau pour tout réafficher).</div>';
+}
+
+window.toggleCurve=function(i){ selectedIdx=(selectedIdx===i)?null:i; renderOverlay(); };
 
 function badge(scope){
   if(scope==="PER") return '<span class="badge per">PER</span>';
@@ -151,7 +192,8 @@ async function loadAll(){
     box.appendChild(row);
   });
 
-  document.getElementById("overlay").innerHTML = overlayChart(overlaySeries, gmin, gmax);
+  OV = { series:overlaySeries, gmin:gmin, gmax:gmax };
+  renderOverlay();
   document.getElementById("scaleNote").innerHTML='<div class="scale-note">Base 100 = 1er point de chaque fonds. Echelle commune : '+gmin.toFixed(1)+'-'+gmax.toFixed(1)+'. j=jour, tot=depuis le debut du suivi.</div>';
 }
 
