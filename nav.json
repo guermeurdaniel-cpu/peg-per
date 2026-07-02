@@ -5,7 +5,7 @@
     "scope": "PEG+PER",
     "value": null,
     "currency": "EUR",
-    "date": "2026-07-01",
+    "date": "2026-07-02",
     "status": "not_found"
   },
   "QS0009099829": {
@@ -14,7 +14,7 @@
     "scope": "PEG+PER",
     "value": null,
     "currency": "EUR",
-    "date": "2026-07-01",
+    "date": "2026-07-02",
     "status": "not_found"
   },
   "QS0009080746": {
@@ -23,7 +23,7 @@
     "scope": "PEG+PER",
     "value": null,
     "currency": "EUR",
-    "date": "2026-07-01",
+    "date": "2026-07-02",
     "status": "not_found"
   },
   "QS0009122746": {
@@ -32,7 +32,7 @@
     "scope": "PEG+PER",
     "value": null,
     "currency": "EUR",
-    "date": "2026-07-01",
+    "date": "2026-07-02",
     "status": "not_found"
   },
   "QS0009080175": {
@@ -41,7 +41,7 @@
     "scope": "PEG+PER",
     "value": null,
     "currency": "EUR",
-    "date": "2026-07-01",
+    "date": "2026-07-02",
     "status": "not_found"
   },
   "QS0009102334": {
@@ -50,7 +50,7 @@
     "scope": "PEG+PER",
     "value": null,
     "currency": "EUR",
-    "date": "2026-07-01",
+    "date": "2026-07-02",
     "status": "not_found"
   },
   "QS0009116219": {
@@ -59,7 +59,7 @@
     "scope": "PER",
     "value": null,
     "currency": "EUR",
-    "date": "2026-07-01",
+    "date": "2026-07-02",
     "status": "not_found"
   }
 }
