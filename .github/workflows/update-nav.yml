@@ -1,4 +1,4 @@
-name: Mise a jour VL fonds
+name: Mise a jour VL Amundi
 
 on:
   schedule:
@@ -20,9 +20,9 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Installer Playwright + navigateur
+      - name: Installer les dependances
         run: |
-          pip install playwright
+          pip install curl-cffi playwright
           python -m playwright install --with-deps chromium
 
       - name: Lancer le robot
@@ -34,7 +34,7 @@ jobs:
           git config user.email "nav-bot@users.noreply.github.com"
           if [ -n "$(git status --porcelain nav.json history.json)" ]; then
             git add nav.json history.json
-            git commit -m "MAJ VL fonds"
+            git commit -m "MAJ VL Amundi"
             git push
           else
             echo "Aucun changement de VL."
