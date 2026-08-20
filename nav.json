@@ -3,63 +3,63 @@
     "isin": "QS0009080720",
     "label": "Amundi Label Monetaire ESR - F",
     "scope": "PEG+PER",
-    "value": 1313.6174,
+    "value": 1313.6931,
     "currency": "EUR",
-    "date": "2026-08-19",
+    "date": "2026-08-20",
     "status": "ok"
   },
   "QS0009099829": {
     "isin": "QS0009099829",
     "label": "Amundi Protect 90 ESR",
     "scope": "PEG+PER",
-    "value": 120.93,
+    "value": 120.86,
     "currency": "EUR",
-    "date": "2026-08-18",
+    "date": "2026-08-19",
     "status": "ok"
   },
   "QS0009080746": {
     "isin": "QS0009080746",
     "label": "Amundi Label Equilibre ESR - F",
     "scope": "PEG+PER",
-    "value": 328.89,
+    "value": 328.03,
     "currency": "EUR",
-    "date": "2026-08-18",
+    "date": "2026-08-19",
     "status": "ok"
   },
   "QS0009122746": {
     "isin": "QS0009122746",
     "label": "CPR ES Action Climat - F",
     "scope": "PEG+PER",
-    "value": 184.5,
+    "value": 182.55,
     "currency": "EUR",
-    "date": "2026-08-18",
+    "date": "2026-08-19",
     "status": "ok"
   },
   "QS0009080175": {
     "isin": "QS0009080175",
     "label": "Amundi Actions Internationales ESR - F",
     "scope": "PEG+PER",
-    "value": 40.03,
+    "value": 39.79,
     "currency": "EUR",
-    "date": "2026-08-18",
+    "date": "2026-08-19",
     "status": "ok"
   },
   "QS0009102334": {
     "isin": "QS0009102334",
     "label": "Amundi Label Harmonie Solidaire ESR - F",
     "scope": "PEG+PER",
-    "value": 14.72,
+    "value": 14.71,
     "currency": "EUR",
-    "date": "2026-08-18",
+    "date": "2026-08-19",
     "status": "ok"
   },
   "QS0009116219": {
     "isin": "QS0009116219",
     "label": "Amundi Convictions ESR - F (C)",
     "scope": "PER",
-    "value": 231.33,
+    "value": 229.26,
     "currency": "EUR",
-    "date": "2026-08-17",
+    "date": "2026-08-18",
     "status": "ok"
   }
 }
