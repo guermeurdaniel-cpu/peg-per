@@ -6,7 +6,7 @@
     "value": 1314.2863,
     "currency": "EUR",
     "date": "2026-08-28",
-    "status": "ok"
+    "status": "ancien"
   },
   "QS0009099829": {
     "isin": "QS0009099829",
@@ -15,7 +15,7 @@
     "value": 120.95,
     "currency": "EUR",
     "date": "2026-08-27",
-    "status": "ok"
+    "status": "ancien"
   },
   "QS0009080746": {
     "isin": "QS0009080746",
@@ -24,7 +24,7 @@
     "value": 328.38,
     "currency": "EUR",
     "date": "2026-08-27",
-    "status": "ok"
+    "status": "ancien"
   },
   "QS0009122746": {
     "isin": "QS0009122746",
@@ -33,7 +33,7 @@
     "value": 183.88,
     "currency": "EUR",
     "date": "2026-08-27",
-    "status": "ok"
+    "status": "ancien"
   },
   "QS0009080175": {
     "isin": "QS0009080175",
@@ -42,7 +42,7 @@
     "value": 40.04,
     "currency": "EUR",
     "date": "2026-08-27",
-    "status": "ok"
+    "status": "ancien"
   },
   "QS0009102334": {
     "isin": "QS0009102334",
@@ -51,7 +51,7 @@
     "value": 14.73,
     "currency": "EUR",
     "date": "2026-08-27",
-    "status": "ok"
+    "status": "ancien"
   },
   "QS0009116219": {
     "isin": "QS0009116219",
@@ -60,6 +60,6 @@
     "value": 228.49,
     "currency": "EUR",
     "date": "2026-08-26",
-    "status": "ok"
+    "status": "ancien"
   }
 }
