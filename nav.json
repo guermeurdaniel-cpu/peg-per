@@ -3,63 +3,63 @@
     "isin": "QS0009080720",
     "label": "Amundi Label Monetaire ESR - F",
     "scope": "PEG+PER",
-    "value": 1315.4033,
+    "value": 1315.7008,
     "currency": "EUR",
-    "date": "2026-09-10",
-    "status": "ancien"
+    "date": "2026-09-14",
+    "status": "ok"
   },
   "QS0009099829": {
     "isin": "QS0009099829",
     "label": "Amundi Protect 90 ESR",
     "scope": "PEG+PER",
-    "value": 119.91,
+    "value": 119.45,
     "currency": "EUR",
-    "date": "2026-09-09",
-    "status": "ancien"
+    "date": "2026-09-11",
+    "status": "ok"
   },
   "QS0009080746": {
     "isin": "QS0009080746",
     "label": "Amundi Label Equilibre ESR - F",
     "scope": "PEG+PER",
-    "value": 323.42,
+    "value": 322.61,
     "currency": "EUR",
-    "date": "2026-09-09",
-    "status": "ancien"
+    "date": "2026-09-11",
+    "status": "ok"
   },
   "QS0009122746": {
     "isin": "QS0009122746",
     "label": "CPR ES Action Climat - F",
     "scope": "PEG+PER",
-    "value": 181.59,
+    "value": 181.64,
     "currency": "EUR",
-    "date": "2026-09-09",
-    "status": "ancien"
+    "date": "2026-09-11",
+    "status": "ok"
   },
   "QS0009080175": {
     "isin": "QS0009080175",
     "label": "Amundi Actions Internationales ESR - F",
     "scope": "PEG+PER",
-    "value": 39.88,
+    "value": 39.39,
     "currency": "EUR",
-    "date": "2026-09-08",
-    "status": "ancien"
+    "date": "2026-09-10",
+    "status": "ok"
   },
   "QS0009102334": {
     "isin": "QS0009102334",
     "label": "Amundi Label Harmonie Solidaire ESR - F",
     "scope": "PEG+PER",
-    "value": 14.6,
+    "value": 14.56,
     "currency": "EUR",
-    "date": "2026-09-09",
-    "status": "ancien"
+    "date": "2026-09-11",
+    "status": "ok"
   },
   "QS0009116219": {
     "isin": "QS0009116219",
     "label": "Amundi Convictions ESR - F (C)",
     "scope": "PER",
-    "value": 225.07,
+    "value": 223.78,
     "currency": "EUR",
-    "date": "2026-09-09",
-    "status": "ancien"
+    "date": "2026-09-10",
+    "status": "ok"
   }
 }
